@@ -7,39 +7,72 @@ class DateParser
     "octobre" => 10, "novembre" => 11, "décembre" => 12
   }
 
+  WEEKDAYS = {
+    "lundi" => 1,
+    "mardi" => 2,
+    "mercredi" => 3,
+    "jeudi" => 4,
+    "vendredi" => 5,
+    "samedi" => 6,
+    "dimanche" => 0
+  }
+
   def parse(input)
-    begin
-      input = input.downcase.strip
-      # Enlever le préfixe "le" du début
-      input.sub!(/^le\s+/, "")
+    input = input.downcase.strip
 
-      # Diviser la date et l'heure
-      date_part, time_part = input.split(" à ")
+    # === 1. Gérer le cas : "lundi prochain à 9 h" ===
+    if input.match(/^(\w+)\s+prochain\s+à\s+(\d{1,2})\s*h(?:\s*(\d{1,2}))?$/)
+      weekday_str = $1
+      hour = $2.to_i
+      minute = $3 ? $3.to_i : 0
 
-      # Extraire jour et mois
-      day, month_name = date_part.split
-      day = day.to_i
-      month = MONTHS[month_name]
+      wday_target = WEEKDAYS[weekday_str]
 
-      # Extraire heure et minute
-      hour, minute = time_part.gsub("h", "").split.map(&:to_i)
-      minute ||= 0  # Si minute est absent, on le met à 0
+      unless wday_target
+        warn "Jour de la semaine inconnu : #{weekday_str}"
+        return nil
+      end
 
-      # Récupérer l'année courante
-      year = Date.today.year
+      today = Date.today
+      days_until = (wday_target - today.wday) % 7
+      days_until = 7 if days_until == 0 # s'il est aujourd'hui, on prend la semaine prochaine
 
-      # Créer un objet DateTime avec l'année, le mois, le jour, l'heure et la minute
-      date_time = DateTime.new(year, month, day, hour, minute)
-
-      # Retourner l'objet DateTime avec le fuseau horaire local
-      date_time.new_offset(DateTime.now.offset)
-    rescue => e
-      puts "Erreur lors du parsing : #{e.message}"
-      nil
+      date = today + days_until
+      return DateTime.new(date.year, date.month, date.day, hour, minute).new_offset(DateTime.now.offset)
     end
+
+    # === 2. Gérer le cas : "le 14 octobre à 15 h 30" ===
+    input.sub!(/^le\s+/, "")
+    date_part, time_part = input.split(" à ")
+
+    unless date_part && time_part
+      warn "Format invalide. Essayez : 'le 14 octobre à 15 h 30'"
+      return nil
+    end
+
+    day, month_name = date_part.split
+    day = day.to_i
+    month = MONTHS[month_name]
+
+    unless month
+      warn "Mois inconnu : #{month_name}"
+      return nil
+    end
+
+    hour, minute = time_part.gsub("h", "").split.map(&:to_i)
+    minute ||= 0
+    year = Date.today.year
+
+    DateTime.new(year, month, day, hour, minute).new_offset(DateTime.now.offset)
+  rescue => e
+    warn "Erreur lors du parsing : #{e.message}"
+    nil
   end
 end
 
-# Exemple d'utilisation :
+# 🔍 Exemples d'utilisation
 parser = DateParser.new
-puts parser.parse("le 14 octobre à 15 h 30")  # => 2025-10-14T15:30:00+01:00
+puts parser.parse("le 14 octobre à 15 h 30")          # => DateTime en octobre
+puts parser.parse("lundi prochain à 9 h")             # => Date du prochain lundi
+puts parser.parse("mercredi prochain à 14 h 15")      # => Prochain mercredi
+puts parser.parse("dimanche prochain à 18 h")         # => Prochain dimanche

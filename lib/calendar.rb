@@ -8,6 +8,9 @@ class Calendar
     if @events.any?
       @month = @events.first.start_date.month
       @year = @events.first.start_date.year
+      first_day = Date.new(@year, @month, 1)
+      @start_wday = (first_day.wday + 6) % 7  # Pour que lundi = 0, dimanche = 6
+
     else
       today = Date.today
       @month = today.month
@@ -33,11 +36,19 @@ class Calendar
   def display
     puts "-" * 71
     print_day_headers
-    total_weeks = (@days_in_month.to_f / 7).ceil
+    days = []
+    @start_wday.times { days << nil } # Jours vides avant le 1er
 
-    (0...total_weeks).each do |week|
-      print_week(week)
+    (1..@days_in_month).each { |d| days << d }
+
+    # Ajouter des cases vides à la fin pour compléter la dernière semaine
+    while days.size % 7 != 0
+      days << nil
     end
+
+weeks = days.each_slice(7).to_a
+weeks.each { |week| print_week(week) }
+
 
     puts "-" * 71
   end
@@ -48,34 +59,40 @@ class Calendar
   end
 
   def print_week(week)
-    start_day = week * 7
-    end_day = [start_day + 6, @days_in_month - 1].min
-
-    print "|"
-    (start_day..end_day).each { |i| print "#{(i + 1).to_s.ljust(9)}|" }
-    puts
-
-    print "|"
-    (start_day..end_day).each do |i|
-      print @calendar[i].any? ? "9:00am  ".ljust(9) + "|" : " ".ljust(9) + "|"
-    end
-    puts
-
-    print "|"
-    (start_day..end_day).each do |i|
-      title = @calendar[i].first.to_s[0..8]  # tronque à 9 caractères
-      print title.ljust(9) + "|"
-    end
-    puts
-
-    2.times do
-      print "|"
-      (start_day..end_day).each { print " ".ljust(9) + "|" }
-      puts
-    end
-
-    puts "-" * 71
+  print "|"
+  week.each do |day|
+    print (day ? day.to_s : "").ljust(9) + "|"
   end
+  puts
+
+  print "|"
+  week.each do |day|
+    if day && @calendar[day - 1].any?
+      print "9:00am".ljust(9) + "|"
+    else
+      print " ".ljust(9) + "|"
+    end
+  end
+  puts
+
+  print "|"
+  week.each do |day|
+    if day && @calendar[day - 1].any?
+      print @calendar[day - 1].first.to_s[0..8].ljust(9) + "|"
+    else
+      print " ".ljust(9) + "|"
+    end
+  end
+  puts
+
+  2.times do
+    print "|"
+    week.each { print " ".ljust(9) + "|" }
+    puts
+  end
+
+  puts "-" * 71
+end
 end
 
 
