@@ -16,7 +16,7 @@ class EventCreator
 
     puts "Génial. Qui va participer ? Balance leurs e-mails (séparés par un point-virgule)"
     emails_input = gets.chomp
-    attendees = emails_input.split(/\s;\s/)
+    attendees = emails_input.split(";")
 
     event = Event.new(date, duration, title, attendees)
 
