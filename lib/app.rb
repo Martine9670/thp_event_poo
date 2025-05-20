@@ -1,9 +1,13 @@
+$all_events = []
 require "pry"
 
 # lignes qui appellent les fichiers lib/user.rb et lib/event.rb
 # comme ça, tu peux faire User.new dans ce fichier d'application. Top.
 require_relative 'user'
 require_relative 'event'
+require_relative 'event_creator'
+require_relative 'calendar'
+require_relative 'date_parser'
 
 
 # Maintenant c'est open bar pour tester ton application. Tous les fichiers importants sont chargés
@@ -40,6 +44,26 @@ if user_found
   puts "Ville : #{user_found.city}"
 else
   puts "Aucun utilisateur trouvé avec l'email #{input_email}."
+end
+
+  # Création d’un événement avec EventCreator,
+  puts "\nSouhaites-tu créer un événement ? (oui/non)"
+  response = gets.chomp.downcase
+
+  if response == "oui"
+    EventCreator.run
+  else
+    puts "Très bien, à une prochaine fois pour créer un événement !"
+  end
+
+  puts "\nSouhaites-tu afficher le calendrier ? (oui/non)"
+  answer = gets.chomp.downcase
+
+  if answer == "oui"
+    require_relative 'calendar'
+    Calendar.new($all_events).display
+  else
+    puts "D'accord, à une prochaine fois pour consulter le calendrier !"
 end
 
 # Pause pour debugger (si tu as la gem 'pry' installée)

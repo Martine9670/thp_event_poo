@@ -28,6 +28,23 @@ class User
     return nil
   end
   user
+    end
 end
 
+if __FILE__ == $0
+  puts "Création d'utilisateurs de test..."
+
+  user1 = User.new("alice@email.com", 30, "Paris")
+  user2 = User.new("bob@email.com", 25, "Lyon")
+
+  puts "\nListe des utilisateurs :"
+  User.all.each do |user|
+    puts "Email: #{user.email}, Âge: #{user.age}, Ville: #{user.city}"
+  end
+
+  puts "\nRecherche d'un utilisateur :"
+  found_user = User.find_by_email("alice@email.com")
+  if found_user
+    puts "Utilisateur trouvé : #{found_user.email}, #{found_user.age} ans, #{found_user.city}"
+  end
 end

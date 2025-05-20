@@ -2,13 +2,20 @@ require 'time' # Pour pouvoir utiliser Time.parse
 require 'pry'
 
 class Event
-  attr_accessor :start_date, :duration, :title, :attendees
+    @@all_events = []
+    attr_accessor :start_date, :duration, :title, :attendees
+
 
   def initialize(start_date, duration, title, attendees)
-    @start_date = Time.parse(start_date)
-    @duration = duration
+    @start_date = start_date.is_a?(String) ? Time.parse(start_date) : start_date    
+    @duration = duration.to_i # en minutes
     @title = title
     @attendees = attendees
+    @@all_events << self
+  end
+
+  def self.all
+    @@all_events
   end
 
   def postpone_24h
@@ -28,11 +35,37 @@ class Event
   end
 
   def is_soon?
-    (@start_date - Time.now) < 1800 # 30 minutes en secondes
+    time_diff = @start_date - Time.now
+    time_diff > 0 && time_diff <= 30 * 60 # entre maintenant et +30 minutes
   end
 
   def to_s
-    "Titre : #{@title}\nDate de début : #{@start_date.strftime("%Y-%m-%d %H:%M")}\nDurée : #{@duration} minutes\nInvités : #{@attendees.join(', ')}"
-  end
+  <<~OUTPUT
+  > Titre : #{@title}
+  > Date de début : #{@start_date.strftime("%Y-%m-%d %H:%M")}
+  > Durée : #{@duration} minutes
+  > Invités : #{@attendees.join(', ')}
+  OUTPUT
+    end
 end
+
+# Test de création d'un événement
+event = Event.new("2025-07-14 15:00", 120, "Balade", ["pierre@email.com"])
+
+# Affiche les informations de l'événement
+puts event.to_s
+
+# Affiche tous les événements
+puts "\nTous les événements :"
+puts Event.all
+
+# Tester la méthode pour savoir si l'événement est dans le futur
+puts "\nL'événement est dans le futur ? #{event.is_future?}"
+
+# Tester la méthode de report de 24h
+event.postpone_24h
+puts "\nNouvelle date après report de 24h : #{event.start_date}"
+
+# Tester la méthode pour savoir si l'événement est bientôt
+puts "\nL'événement est-il prévu bientôt ? #{event.is_soon?}"
 
