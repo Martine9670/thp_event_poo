@@ -16,13 +16,18 @@ require_relative 'date_parser'
 
 # Création de quelques utilisateurs
 julie = User.new("julie@email.com", 32, "Paris")
+jean = User.new("jean@maimail.com", 27, "Avignon")
 pierre = User.new("pierre@email.com", 28, "Dijon")
 bob = User.new("bob@email.com", 41, "Nice")
+
+my_event = Event.new("2019-01-13 09:00", 10, "standup quotidien", [julie, jean])
+
+my_event.age_analysis #j'exécute la nouvelle méthode que j'ai écrite
 
 # Récupérer tous les utilisateurs,
 all_users = User.all
 all_users.each do |user|
-  puts "Email: #{user.email}, Age: #{user.age} City: #{user.city}"
+  puts "Email: #{user.email}, Age: #{user.age}, City: #{user.city}"
 end
 
 # Exemple d'utilisation pour la classe Event,
@@ -41,7 +46,8 @@ if user_found
   puts "Utilisateur trouvé :"
   puts "Email : #{user_found.email}"
   puts "Âge : #{user_found.age}"
-  puts "Ville : #{user_found.city}"
+  puts "City : #{user_found.city}"
+  
 else
   puts "Aucun utilisateur trouvé avec l'email #{input_email}."
 end

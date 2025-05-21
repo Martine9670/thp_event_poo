@@ -12,6 +12,25 @@ class Event
     @title = title
     @attendees = attendees
     @@all_events << self
+
+    return puts "Aucun participant à analyser." if @attendees.empty?
+
+  end
+
+  def age_analysis
+    age_array = [] #On initialise un array qui va contenir les âges de tous les participants à un évènement
+    average = 0 #On initialise une variable pour calculer la moyenne d'âge à l'évènement
+
+    @attendees.each do |attendee| #On parcourt tous les participants (objets de type User)
+      age_array << attendee.age #leur âge est stocké dans l'array des âges
+      average = average + attendee.age #leur âge est additionné pour préparer le calcul de la moyenne
+    end
+
+    average = average / @attendees.length #on divise la somme des âges pour avoir la moyenne
+
+    puts "Voici les âges des participants :"
+    puts age_array.join(", ")
+    puts "La moyenne d'âge est de #{average} ans"
   end
 
   def self.all
@@ -44,10 +63,13 @@ class Event
   > Titre : #{@title}
   > Date de début : #{@start_date.strftime("%Y-%m-%d %H:%M")}
   > Durée : #{@duration} minutes
-  > Invités : #{@attendees.join(', ')}
+  > Invités : #{@attendees.map(&:to_s).join(', ')}
   OUTPUT
     end
 end
+
+
+
 
 # Test de création d'un événement
 event = Event.new("2025-07-14 15:00", 120, "Balade", ["pierre@email.com"])
@@ -57,7 +79,7 @@ puts event.to_s
 
 # Affiche tous les événements
 puts "\nTous les événements :"
-puts Event.all
+puts Event.all.map(&:to_s)
 
 # Tester la méthode pour savoir si l'événement est dans le futur
 puts "\nL'événement est dans le futur ? #{event.is_future?}"

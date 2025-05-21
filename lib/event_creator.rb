@@ -18,7 +18,7 @@ class EventCreator
     emails_input = gets.chomp
     attendees = emails_input.split(";")
 
-    event = Event.new(date, duration, title, attendees)
+    event = Event.new(date, duration, title, attendees, location)
 
     puts "Super, c'est noté, ton évènement a été créé !"
     puts
